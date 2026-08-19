@@ -1,0 +1,104 @@
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carnet d'Adresses - CRUD</title>
+    <!-- CDN Tailwind direct pour garantir un rendu immédiat et parfait -->
+   
+    {% tailwind_css %}
+</head>
+<body class="bg-blue-500 font-sans min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="max-w-5xl w-full mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-black text-gray-900 tracking-tight">Carnet d'Adresses</h1>
+            <p class="text-gray-600 mt-2 font-medium">Gestion CRUD en mémoire (sans persistance de données)</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <!-- Formulaire d'Ajout / Modification -->
+            <div class="bg-white p-6 rounded-lg shadow-md md:col-span-1">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">
+                    {% if contact_to_edit %}Modifier le contact{% else %}Ajouter un contact{% endif %}
+                </h2>
+                <form method="POST" action="{% if contact_to_edit %}{% url 'contact_update' contact_to_edit.id %}{% else %}{% url 'contact_add' %}{% endif %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Nom :</label>
+                        <input type="text" name="nom" value="{% if contact_to_edit %}{{ contact_to_edit.nom }}{% endif %}" required
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Prénom :</label>
+                        <input type="text" name="prenom" value="{% if contact_to_edit %}{{ contact_to_edit.prenom }}{% endif %}" required
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Téléphone :</label>
+                        <input type="text" name="telephone" value="{% if contact_to_edit %}{{ contact_to_edit.telephone }}{% endif %}"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Email :</label>
+                        <input type="email" name="email" value="{% if contact_to_edit %}{{ contact_to_edit.email }}{% endif %}"
+                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            {% if contact_to_edit %}Mettre à jour{% else %}Ajouter{% endif %}
+                        </button>
+                        {% if contact_to_edit %}
+                            <a href="{% url 'contact' %}" class="text-gray-500 hover:text-gray-800 text-sm">Annuler</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            <!-- Liste des Contacts -->
+            <div class="bg-white p-6 rounded-lg shadow-md md:col-span-2">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Liste des Contacts</h2>
+                {% if contacts %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                                    <th class="py-3 px-4 text-left">Nom & Prénom</th>
+                                    <th class="py-3 px-4 text-left">Téléphone</th>
+                                    <th class="py-3 px-4 text-left">Email</th>
+                                    <th class="py-3 px-4 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light">
+                                {% for c in contacts %}
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-left whitespace-nowrap font-medium text-gray-800">
+                                            {{ c.nom }} {{ c.prenom }}
+                                        </td>
+                                        <td class="py-3 px-4 text-left">
+                                            {{ c.telephone|default:"-" }}
+                                        </td>
+                                        <td class="py-3 px-4 text-left">
+                                            {{ c.email|default:"-" }}
+                                        </td>
+                                        <td class="py-3 px-4 text-center">
+                                            <div class="flex item-center justify-center space-x-2">
+                                                <a href="?edit={{ c.id }}" class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded text-xs">Éditer</a>
+                                                <a href="{% url 'contact_delete' c.id %}" onclick="return confirm('Voulez-vous vraiment supprimer ce contact ?');" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Supprimer</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 italic">Aucun contact dans le carnet d'adresses.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
